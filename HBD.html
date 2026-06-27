@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donz & Sia</title>
+    <!-- Importing a fun, bubbly font for the heading and a clean one for text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #ffe5ec; /* Light pastel pink */
+            --polaroid-bg: #ffffff;
+            --text-main: #4a4a4a;
+            --accent-pink: #ffb3c6;
+            --bubble-font: 'Fredoka', sans-serif;
+            --body-font: 'Quicksand', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--body-font);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Top Menu Navigation System (Top Right Pinned) */
+        .menu-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: inline-block;
+        }
+
+        /* Heart Music Indicator Sticker */
+        .menu-trigger {
+            background: #ffffff;
+            border: 3px solid #ff7096;
+            padding: 10px 14px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+        }
+
+        .menu-trigger span {
+            font-family: var(--bubble-font);
+            font-size: 0.95rem;
+            color: #ff7096;
+            font-weight: 600;
+        }
+
+        /* Hover & Tap states for the main indicator button */
+        .menu-container:hover .menu-trigger,
+        .menu-container.forced-open .menu-trigger {
+            transform: scale(1.05);
+            background: #fff5f7;
+            box-shadow: 0 6px 15px rgba(255, 112, 150, 0.2);
+        }
+
+        /* Dropdown Box Panel Layout */
+        .menu-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: #ffffff;
+            border-radius: 18px;
+            width: 280px;
+            padding: 18px;
+            box-shadow: 0 10px 30px rgba(255, 112, 150, 0.15);
+            border: 2px solid #ffccd5;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Activate Dropdown on Hover OR via Class-toggle (Click) */
+        .menu-container:hover .menu-dropdown,
+        .menu-container.forced-open .menu-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .menu-title {
+            font-family: var(--bubble-font);
+            color: #ff7096;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            border-bottom: 2px dashed #ffe5ec;
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Inner Menu Buttons & Track list styles */
+        .music-playlist {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .song-btn {
+            background: #fff5f7;
+            border: 1px solid #ffccd5;
+            border-radius: 10px;
+            padding: 10px 12px;
+            text-align: left;
+            font-family: var(--body-font);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #555;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .song-btn span.song-meta {
+            font-weight: 500;
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-left: auto;
+        }
+
+        .song-btn::before {
+            content: '▶';
+            color: #ff7096;
+            margin-right: 8px;
+            font-size: 0.8rem;
+        }
+
+        .song-btn:hover {
+            background: #ff7096;
+            color: #ffffff;
+            border-color: #ff7096;
+            transform: translateX(-3px);
+        }
+
+        .song-btn:hover span.song-meta {
+            color: #ffe5ec;
+        }
+
+        /* Tab Content Control Systems */
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            animation: fadeIn 0.6s ease-in-out;
+            flex-grow: 1;
+        }
+
+        .active-tab {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Container to manage layout */
+        .wrapper {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Header Styling */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            margin-top: 40px;
+        }
+
+        header h1, .tab-content h1 {
+            font-family: var(--bubble-font);
+            font-size: 3.5rem;
+            color: #ff7096;
+            text-shadow: 3px 3px 0px #fff, 5px 5px 0px var(--accent-pink);
+            letter-spacing: 2px;
+            animation: float 3s ease-in-out infinite;
+            text-align: center;
+        }
+
+        .tab-content h1 {
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Section Headings inside Pics Tab */
+        .section-caption {
+            font-family: var(--bubble-font);
+            font-size: 2rem;
+            color: #ff7096;
+            margin: 40px 0 20px 0;
+            text-shadow: 2px 2px 0px #fff;
+            text-align: center;
+            width: 100%;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Polaroid Grid - Flexible Layout */
+        .polaroid-grid {
+            display: grid;
+            gap: 30px;
+            width: 100%;
+            justify-content: center;
+            perspective: 1000px;
+            margin-bottom: 60px;
+        }
+
+        /* GALLERY LAYOUT SYSTEMS FOR THE PICS TAB */
+        .pics-main-grid {
+            display: grid;
+            width: 100%;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+/* Container to hold all three strips */
+.photobooth-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 15px;
+}
+
+/* Individual photo frames */
+.photobooth-frame {
+    background: #fff;
+    padding: 5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+}
+
+/* Hover effect for interactivity */
+.photobooth-frame:hover {
+    transform: scale(1.03);
+}
+
+/* Keeps the vertical strips responsive and proportional */
+.photobooth-img {
+    display: block;
+    max-width: 220px; /* Adjust this width depending on your layout space */
+    height: auto;
+    border-radius: 2px;
+
+        }
+
+        .gift-sunrise-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .sia-dice-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 700px;
+            margin-bottom: 40px;
+        }
+        
+        .sia-dice-grid .polaroid:nth-child(1) { grid-column: 1; grid-row: 1; }
+        .sia-dice-grid .polaroid:nth-child(2) { grid-column: 3; grid-row: 1; }
+        .sia-dice-grid .polaroid:nth-child(3) { grid-column: 2; grid-row: 2; }
+        .sia-dice-grid .polaroid:nth-child(4) { grid-column: 1; grid-row: 3; }
+        .sia-dice-grid .polaroid:nth-child(5) { grid-column: 3; grid-row: 3; }
+
+        /* Polaroid Card Design */
+        .polaroid {
+            background: var(--polaroid-bg);
+            padding: 12px 12px 22px 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border-radius: 2px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* Image/Video Aspect Ratio Layout Variants */
+        .image-placeholder, .polaroid img, .polaroid video {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #999;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+        
+        .image-placeholder {
+            background-color: #f0f0f0;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Formats requested */
+        .ratio-1-1 { aspect-ratio: 1 / 1; }
+        .ratio-strip { aspect-ratio: 1 / 3; } 
+        .ratio-16-9 { aspect-ratio: 16 / 9; } 
+
+        .polaroid span {
+            font-family: var(--bubble-font);
+            margin-top: 12px;
+            font-size: 1rem;
+            color: #ff7096;
+            text-align: center;
+        }
+
+        /* Interactive Hover/Tap Zoom Animation */
+        .polaroid:hover, .polaroid:active {
+            transform: scale(1.08) rotate(2deg) translateY(-8px);
+            box-shadow: 0 25px 40px rgba(255, 112, 150, 0.25);
+            z-index: 10;
+        }
+
+        /* Prevent the polaroid from spinning out when interacting directly with video controls */
+        .polaroid:focus-within {
+            transform: none !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        /* Dynamic Click-to-Zoom Fullscreen Overlay Backdrop */
+        .zoom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            cursor: zoom-out;
+        }
+
+        .zoom-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Cloned card template layout when locked in overlay mode */
+        .zoom-overlay .polaroid {
+            width: 90%;
+            max-width: 450px;
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 20px 20px 35px 20px;
+            cursor: default;
+        }
+
+        .zoom-overlay .polaroid.widescreen-preview {
+            max-width: 650px;
+        }
+
+        .zoom-overlay .polaroid.tall-preview {
+            max-width: 320px;
+        }
+
+        .zoom-overlay.active .polaroid {
+            transform: scale(1) rotate(0deg);
+        }
+
+        .zoom-overlay .polaroid span {
+            font-size: 1.4rem;
+            margin-top: 18px;
+        }
+
+        /* Content Blocks placeholders */
+        .content-box { 
+            background: rgba(255,255,255,0.6); 
+            padding: 30px; 
+            border-radius: 20px; 
+            max-width: 800px; 
+            width: 100%;
+            text-align: center; 
+            color: #333; 
+            line-height: 1.6; 
+            margin-bottom: 20px; 
+        }
+
+        /* Hello Kitty Back Button Sticker System */
+        .hk-sticker-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-top: 30px;
+            margin-bottom: 40px;
+            z-index: 10;
+            padding: 0;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15));
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hk-sticker-btn svg {
+            width: 75px;
+            height: 75px;
+        }
+
+        .hk-sticker-btn:hover, .hk-sticker-btn:active {
+            transform: scale(1.15) rotate(-5deg);
+            filter: drop-shadow(0 8px 15px rgba(255, 112, 150, 0.3));
+        }
+
+        /* Decorative Background Particles */
+        .heart-container { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+        .heart { position: absolute; color: #ff7096; font-size: 20px; animation: floatUp 6s linear infinite; }
+        @keyframes floatUp { 0% { transform: translateY(110vh); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(-10vh); opacity: 0; } }
+
+        /* Footer Layout */
+        footer {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 15px 30px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-left { justify-self: start; }
+        .footer-thumb {
+            width: 50px;
+            height: 50px;
+            background: #eee;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: #aaa;
+        }
+        .footer-center {
+            justify-self: center;
+            font-family: var(--body-font);
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #ff7096;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .footer-right { justify-self: end; display: flex; align-items: center; }
+
+        /* SVG Gerbera Flower Animation */
+        .gerbera {
+            width: 55px;
+            height: 55px;
+            transform-origin: bottom center;
+            animation: windSway 4s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .gerbera:hover, .gerbera:active { animation: fastSway 0.5s ease-in-out infinite; }
+
+        @keyframes windSway {
+            0%, 100% { transform: rotate(2deg); }
+            50% { transform: rotate(-8deg) translateX(-2px); }
+        }
+        @keyframes fastSway {
+            0%, 100% { transform: rotate(4deg); }
+            50% { transform: rotate(-12deg) translateX(-4px); }
+        }
+
+        /* RESPONSIVE BREAKPOINTS */
+        @media (min-width: 768px) {
+            .polaroid-grid { grid-template-columns: repeat(4, minmax(180px, 240px)); }
+            .polaroid-grid .polaroid:nth-child(odd) { transform: rotate(-1deg); }
+            .polaroid-grid .polaroid:nth-child(even) { transform: rotate(1.5deg); }
+            .pics-main-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+
+        @media (max-width: 767px) {
+            header h1, .tab-content h1 { font-size: 2.5rem; }
+            .polaroid-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 0 10px; }
+            .polaroid { padding: 10px 10px 18px 10px; }
+            footer { grid-template-columns: auto 1fr auto; padding: 10px 15px; }
+            .footer-center { font-size: 0.9rem; padding: 0 5px; }
+            .footer-thumb { width: 40px; height: 40px; }
+            .gerbera { width: 45px; height: 45px; }
+            .hk-sticker-btn svg { width: 65px; height: 65px; }
+            .menu-container { top: 10px; right: 10px; }
+            .menu-dropdown { width: 240px; }
+            .pics-main-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
+            .photo-booth-grid { gap: 12px; }
+            .gift-sunrise-grid { grid-template-columns: 1fr; gap: 20px; } 
+            .sia-dice-grid { gap: 10px; }
+            .section-caption { font-size: 1.6rem; margin: 30px 0 15px 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fullscreen click-to-zoom backdrop platform element -->
+    <div class="zoom-overlay" id="zoomOverlay" onclick="closeZoom()"></div>
+
+    <!-- Background Environment Particle Stage -->
+    <div class="heart-container" id="heart-bg"></div>
+
+    <!-- Pinned Top Right Closable Music Menu Container -->
+    <div class="menu-container" id="topMenu">
+        <div class="menu-trigger" onclick="toggleMenu(event)">
+            <span>Music</span> 💝🎵
+        </div>
+        <div class="menu-dropdown">
+            <div class="menu-title">
+                🎵 Track Playlist
+            </div>
+            <div class="music-playlist">
+                <button class="song-btn" onclick="selectSong('Song Title One')">
+                    Blue Spring <span class="song-meta">03:14</span>
+                </button>
+                <button class="song-btn" onclick="selectSong('Song Title Two')">
+                    Forever Sweet <span class="song-meta">02:45</span>
+                </button>
+                <button class="song-btn" onclick="selectSong('Song Title Three')">
+                    First Love <span class="song-meta">04:02</span>
+                </button>
+                <button class="song-btn" onclick="selectSong('Song Title Four')">
+                    Our Theme <span class="song-meta">03:30</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        
+        <!-- Tab 1: Home Dashboard Grid Links -->
+        <div id="home-tab" class="tab-content active-tab">
+            <header>
+                <h1>Donz & Sia</h1>
+            </header>
+
+            <main class="polaroid-grid">
+                
+                <div class="polaroid" onclick="showTab('vids-tab')">
+                    <div class="image-placeholder ratio-1-1">🎬</div>
+                    <span>Vids</span>
+                </div>
+
+                <div class="polaroid" onclick="showTab('poem-tab')">
+                    <div class="image-placeholder ratio-1-1">📝</div>
+                    <span>poem</span>
+                </div>
+
+                <div class="polaroid" onclick="showTab('pics-tab')">
+                    <div class="image-placeholder ratio-1-1">🖼️</div>
+                    <span>pics</span>
+                </div>
+
+                <div class="polaroid" onclick="showTab('message-tab')">
+                    <div class="image-placeholder ratio-1-1">✉️</div>
+                    <span>message</span>
+                </div>
+
+            </main>
+        </div>
+
+        <!-- Tab 2: Vids Content Panel -->
+        <div id="vids-tab" class="tab-content">
+            <h1>Vids</h1>
+            <div class="content-box" style="display: flex; justify-content: center;">
+                <div class="polaroid" style="max-width: 340px; width: 100%;" onclick="handleVideoCardClick(event, this)">
+                    <video id="memoryVideo" class="ratio-1-1" controls preload="metadata">
+                        <source src="video.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <span>Our Special Memory ✨</span>
+                </div>
+            </div>
+            <button class="hk-sticker-btn" onclick="showTab('home-tab')" aria-label="Go Back">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="50" cy="53" rx="41" ry="32" fill="#ffffff" />
+                    <circle cx="21" cy="27" r="14" fill="#ffffff" />
+                    <circle cx="79" cy="27" r="14" fill="#ffffff" />
+                    <circle cx="78" cy="33" r="13" fill="#ffffff" />
+                    <ellipse cx="50" cy="53" rx="36" ry="27" fill="#ffffff" stroke="#111111" stroke-width="3.5" />
+                    <path d="M 18,37 C 12,28 14,18 24,22 C 29,24 32,32 32,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+                    <path d="M 82,37 C 88,28 86,18 76,22 C 71,24 68,32 68,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+                    <ellipse cx="50" cy="53" rx="35.5" ry="26.5" fill="#ffffff" />
+                    <ellipse cx="50" cy="57" rx="4.5" ry="3.5" fill="#ffdf00" stroke="#111111" stroke-width="2.5" />
+                    <ellipse cx="33" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+                    <ellipse cx="67" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+                    <path d="M 20,54 L 8,53 M 19,60 L 6,61 M 21,66 L 9,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+                    <path d="M 80,54 L 92,53 M 81,60 L 94,61 M 79,66 L 91,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+                    <g transform="translate(4, -2)">
+                        <circle cx="61" cy="33" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                        <circle cx="75" cy="41" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                        <circle cx="67" cy="38" r="5.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                    </g>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Tab 3: Poem Content Panel -->
+        <div id="poem-tab" class="tab-content">
+            <h1>Poem</h1>
+            <div class="content-box">
+                <p>Write or paste your poem text content here.</p>
+            </div>
+            <button class="hk-sticker-btn" onclick="showTab('home-tab')" aria-label="Go Back">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="50" cy="53" rx="41" ry="32" fill="#ffffff" />
+                    <circle cx="21" cy="27" r="14" fill="#ffffff" />
+                    <circle cx="79" cy="27" r="14" fill="#ffffff" />
+                    <circle cx="78" cy="33" r="13" fill="#ffffff" />
+                    <ellipse cx="50" cy="53" rx="36" ry="27" fill="#ffffff" stroke="#111111" stroke-width="3.5" />
+                    <path d="M 18,37 C 12,28 14,18 24,22 C 29,24 32,32 32,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+                    <path d="M 82,37 C 88,28 86,18 76,22 C 71,24 68,32 68,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+                    <ellipse cx="50" cy="53" rx="35.5" ry="26.5" fill="#ffffff" />
+                    <ellipse cx="50" cy="57" rx="4.5" ry="3.5" fill="#ffdf00" stroke="#111111" stroke-width="2.5" />
+                    <ellipse cx="33" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+                    <ellipse cx="67" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+                    <path d="M 20,54 L 8,53 M 19,60 L 6,61 M 21,66 L 9,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+                    <path d="M 80,54 L 92,53 M 81,60 L 94,61 M 79,66 L 91,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+                    <g transform="translate(4, -2)">
+                        <circle cx="61" cy="33" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                        <circle cx="75" cy="41" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                        <circle cx="67" cy="38" r="5.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                    </g>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Tab 4: Pics Content Panel -->
+        <div id="pics-tab" class="tab-content">
+            <h1>Pics</h1>
+            
+            <!-- Section 1: Main Grid System with all 25 populated frames -->
+            <div class="pics-main-grid">
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="1.1.jpg" alt="Memory 1" class="ratio-1-1">
+                    <span>Memory 1</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="1.jpg" alt="Memory 2" class="ratio-1-1">
+                    <span>Memory 2</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="2.jpg" alt="Memory 3" class="ratio-1-1">
+                    <span>Memory 3</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="3.jpg" alt="Memory 4" class="ratio-1-1">
+                    <span>Memory 4</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="4.jpg" alt="Memory 5" class="ratio-1-1">
+                    <span>Memory 5</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="5.jpg" alt="Memory 6" class="ratio-1-1">
+                    <span>Memory 6</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="6.jpg" alt="Memory 7" class="ratio-1-1">
+                    <span>Memory 7</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="7.jpg" alt="Memory 8" class="ratio-1-1">
+                    <span>Memory 8</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="8.jpg" alt="Memory 9" class="ratio-1-1">
+                    <span>Memory 9</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="9.jpg" alt="Memory 10" class="ratio-1-1">
+                    <span>Memory 10</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="10.jpg" alt="Memory 11" class="ratio-1-1">
+                    <span>Memory 11</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="11.jpg" alt="Memory 12" class="ratio-1-1">
+                    <span>Memory 12</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="13.jpg" alt="Memory 13" class="ratio-1-1">
+                    <span>Memory 13</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="14.jpg" alt="Memory 14" class="ratio-1-1">
+                    <span>Memory 14</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="15.jpg" alt="Memory 15" class="ratio-1-1">
+                    <span>Memory 15</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="16.jpg" alt="Memory 16" class="ratio-1-1">
+                    <span>Memory 16</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="17.jpg" alt="Memory 17" class="ratio-1-1">
+                    <span>Memory 17</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="18.jpg" alt="Memory 18" class="ratio-1-1">
+                    <span>Memory 18</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="19.jpg" alt="Memory 19" class="ratio-1-1">
+                    <span>Memory 19</span>
+                </div>
+
+                <!-- Replaced original loop with your specific photo files verbatim -->
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="26.jpg" alt="Memory 20" class="ratio-1-1">
+                    <span>Memory 20</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="21.jpg" alt="Memory 21" class="ratio-1-1">
+                    <span>Memory 21</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="22.jpg" alt="Memory 22" class="ratio-1-1">
+                    <span>Memory 22</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="23.jpg" alt="Memory 23" class="ratio-1-1">
+                    <span>Memory 23</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="24.jpg" alt="Memory 24" class="ratio-1-1">
+                    <span>Memory 24</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <img src="25.jpg" alt="Memory 25" class="ratio-1-1">
+                    <span>Memory 25</span>
+                </div>
+            </div>
+
+            <!-- Section 2: Photo Booths (3 Long Vertical Strips arranged horizontally) -->
+            <div class="section-caption">photo booths</div>
+            <div class="photo-booth-grid">
+         <!-- Inside your Photobooth Corner "Pics" Tab -->
+<div class="photobooth-container">
+    <div class="photobooth-frame">
+        <img src="8.jpg" alt="Photobooth Strip - March 18, 2026" class="photobooth-img">
+    </div>
+    
+    <div class="photobooth-frame">
+        <img src="13.jpg" alt="Photobooth Strip - November 16, 2025" class="photobooth-img">
+    </div>
+    
+    <div class="photobooth-frame">
+        <img src="15.jpg" alt="Photobooth Strip - February 14, 2026" class="photobooth-img">
+    </div>
+</div>
+            <!-- Section 3: Gift and Sunrise (3 Landscape Oriented 16:9 Frames) -->
+            <div class="section-caption">gift and sunrise</div>
+            <div class="gift-sunrise-grid">
+                <div class="polaroid" onclick="zoomPicture(this, 'widescreen')">
+                    <img src="Sunset.jpg" alt="gift">
+                    <span>Sunrise</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'widescreen')">
+                    <img src="gifft.jpg" alt="gift">
+                    <span>The Gift</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'widescreen')">
+                    <img src="Sunset2.jpg" alt="gift">
+                    <span>Our Moment</span>
+                </div>
+            </div>
+
+            <!-- Section 4: Sia❤️ (5 1x1 Polaroids in Dice layout arrangement configuration) -->
+            <div class="section-caption">Sia ❤️</div>
+            <div class="sia-dice-grid">
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <div class="image-placeholder ratio-1-1">Dice Point 1</div>
+                    <span>Angel</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <div class="image-placeholder ratio-1-1">Dice Point 2</div>
+                    <span>Darling</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <div class="image-placeholder ratio-1-1">Dice Point 3</div>
+                    <span>My Love</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <div class="image-placeholder ratio-1-1">Dice Point 4</div>
+                    <span>Sweetheart</span>
+                </div>
+                <div class="polaroid" onclick="zoomPicture(this, 'square')">
+                    <div class="image-placeholder ratio-1-1">Dice Point 5</div>
+                    <span>Forever</span>
+                </div>
+            </div>
+
+            <button class="hk-sticker-btn" onclick="showTab('home-tab')" aria-label="Go Back">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="50" cy="53" rx="41" ry="32" fill="#ffffff" />
+                    <circle cx="21" cy="27" r="14" fill="#ffffff" />
+                    <circle cx="79" cy="27" r="14" fill="#ffffff" />
+                    <circle cx="78" cy="33" r="13" fill="#ffffff" />
+                    <ellipse cx="50" cy="53" rx="36" ry="27" fill="#ffffff" stroke="#111111" stroke-width="3.5" />
+                    <path d="M 18,37 C 12,28 14,18 24,22 C 29,24 32,32 32,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+                    <path d="M 82,37 C 88,28 86,18 76,22 C 71,24 68,32 68,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+                    <ellipse cx="50" cy="53" rx="35.5" ry="26.5" fill="#ffffff" />
+                    <ellipse cx="50" cy="57" rx="4.5" ry="3.5" fill="#ffdf00" stroke="#111111" stroke-width="2.5" />
+                    <ellipse cx="33" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+                    <ellipse cx="67" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+                    <path d="M 20,54 L 8,53 M 19,60 L 6,61 M 21,66 L 9,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+                    <path d="M 80,54 L 92,53 M 81,60 L 94,61 M 79,66 L 91,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+                    <g transform="translate(4, -2)">
+                        <circle cx="61" cy="33" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                        <circle cx="75" cy="41" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                        <circle cx="67" cy="38" r="5.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                    </g>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Tab 5: Message Content Panel -->
+        <div id="message-tab" class="tab-content">
+            <h1>Message</h1>
+            <div class="content-box">
+                <p>Write your special love note here!</p>
+            </div>
+            <button class="hk-sticker-btn" onclick="showTab('home-tab')" aria-label="Go Back">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="50" cy="53" rx="41" ry="32" fill="#ffffff" />
+                    <circle cx="21" cy="27" r="14" fill="#ffffff" />
+                    <circle cx="79" cy="27" r="14" fill="#ffffff" />
+                    <circle cx="78" cy="33" r="13" fill="#ffffff" />
+                    <ellipse cx="50" cy="53" rx="36" ry="27" fill="#ffffff" stroke="#111111" stroke-width="3.5" />
+                    <path d="M 18,37 C 12,28 14,18 24,22 C 29,24 32,32 32,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+                    <path d="M 82,37 C 88,28 86,18 76,22 C 71,24 68,32 68,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+                    <ellipse cx="50" cy="53" rx="35.5" ry="26.5" fill="#ffffff" />
+                    <ellipse cx="50" cy="57" rx="4.5" ry="3.5" fill="#ffdf00" stroke="#111111" stroke-width="2.5" />
+                    <ellipse cx="33" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+                    <ellipse cx="67" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+                    <path d="M 20,54 L 8,53 M 19,60 L 6,61 M 21,66 L 9,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+                    <path d="M 80,54 L 92,53 M 81,60 L 94,61 M 79,66 L 91,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+                    <g transform="translate(4, -2)">
+                        <circle cx="61" cy="33" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                        <circle cx="75" cy="41" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                        <circle cx="67" cy="38" r="5.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                    </g>
+                </svg>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Global Layout Footer Area -->
+    <footer>
+        <div class="footer-left">
+            <div class="footer-thumb">🏡💝</div>
+        </div>
+        <div class="footer-center">
+            Made with Love for Sia ❤️
+        </div>
+        <div class="footer-right">
+            <svg class="gerbera" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 50,60 Q 48,85 45,100" stroke="#7cd97c" stroke-width="5" fill="none" stroke-linecap="round" />
+                <g fill="#ff7096" stroke="#ff4d7d" stroke-width="1">
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(0 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(30 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(60 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(90 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(120 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(150 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(180 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(210 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(240 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(270 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(300 50 50)" />
+                    <ellipse cx="50" cy="30" rx="6" ry="22" transform="rotate(330 50 50)" />
+                </g>
+                <circle cx="50" cy="50" r="11" fill="#ffcc00" stroke="#e6b800" stroke-width="1.5" />
+            </svg>
+        </div>
+    </footer>
+
+    <!-- JavaScript Interactions Logic Layer -->
+    <script>
+        // Tab switching controller Engine
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active-tab'));
+            
+            const targetTab = document.getElementById(tabId);
+            if(targetTab) {
+                targetTab.classList.add('active-tab');
+            }
+
+            if (tabId !== 'vids-tab') {
+                const vid = document.getElementById('memoryVideo');
+                if (vid) vid.pause();
+            }
+        }
+
+        // Music dropdown widget open/close event toggle handler
+        function toggleMenu(event) {
+            event.stopPropagation();
+            const container = document.getElementById('topMenu');
+            container.classList.toggle('forced-open');
+        }
+
+        function selectSong(title) {
+            console.log("Playing selected song sequence layout target: " + title);
+            document.getElementById('topMenu').classList.remove('forced-open');
+        }
+
+        document.addEventListener('click', () => {
+            document.getElementById('topMenu').classList.remove('forced-open');
+        });
+
+        // Floating ambient pink bubble elements builder logic 
+        function createHeartParticle() {
+            const container = document.getElementById('heart-bg');
+            if(!container) return;
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = Math.random() > 0.5 ? '❤️' : '💖';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            heart.style.fontSize = (Math.random() * 15 + 12) + 'px';
+            container.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 7000);
+        }
+        setInterval(createHeartParticle, 900);
+
+        // Click logic separation for video interface elements
+        function handleVideoCardClick(event, element) {
+            if (event.target.tagName.toLowerCase() === 'video' || event.target.closest('video')) {
+                return;
+            }
+            zoomPicture(element, 'square');
+        }
+
+        // Card Zoom Overlay Backdrop Portal Engine
+        function zoomPicture(element, formatType) {
+            const overlay = document.getElementById('zoomOverlay');
+            overlay.innerHTML = ''; 
+
+            const clone = element.cloneNode(true);
+            clone.removeAttribute('onclick'); 
+
+            if(formatType === 'widescreen') clone.classList.add('widescreen-preview');
+            if(formatType === 'tall') clone.classList.add('tall-preview');
+
+            const targetVideo = clone.querySelector('video');
+            if(targetVideo) {
+                targetVideo.setAttribute('controls', 'true');
+                const originalVideo = element.querySelector('video');
+                targetVideo.currentTime = originalVideo.currentTime;
+                if(!originalVideo.paused) {
+                    setTimeout(() => { targetVideo.play(); }, 50);
+                }
+            }
+
+            overlay.appendChild(clone);
+            overlay.classList.add('active');
+        }
+
+        function closeZoom() {
+            const overlay = document.getElementById('zoomOverlay');
+            
+            const modalVideo = overlay.querySelector('video');
+            const nativeVideo = document.getElementById('memoryVideo');
+            if(modalVideo && nativeVideo) {
+                nativeVideo.currentTime = modalVideo.currentTime;
+                if(!modalVideo.paused) {
+                    nativeVideo.play();
+                } else {
+                    nativeVideo.pause();
+                }
+            }
+
+            overlay.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
