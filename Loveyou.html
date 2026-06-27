@@ -203,7 +203,12 @@
         background: #ffccd5;
         border-radius: 4px;
     }
-
+        #zoom-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center;
+            cursor: zoom-out; animation: fadeIn 0.3s ease;
+        }
+        #zoom-img { max-width: 90%; max-height: 80%; border: 10px solid white; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
     .song-btn {
         background: #fff5f7;
         border: 1px solid #ffccd5;
@@ -315,7 +320,7 @@
         border-radius: 2px;
         text-decoration: none;
         color: var(--text-main);
-        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, z-index 0s;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -332,6 +337,7 @@
         color: #999;
         object-fit: cover;
         border-radius: 2px;
+        transition: max-height 0.4s ease;
     }
     
     .image-placeholder {
@@ -350,18 +356,19 @@
         font-size: 1rem;
         color: #ff7096;
         text-align: center;
+        transition: opacity 0.3s ease;
     }
 
-    .polaroid:hover, .polaroid:active {
+    /* Soft hover lift when browsing normal grid items */
+    .polaroid:hover:not(.zoomed), .polaroid:active:not(.zoomed) {
         transform: scale(1.08) rotate(2deg) translateY(-8px);
         box-shadow: 0 25px 40px rgba(255, 112, 150, 0.25);
         z-index: 10;
     }
 
     /* ==========================================
-       6. SPECIALIST PICS TAB LAYOUT SYSTEMS
+       6. SPECIALIST PICS TAB & UNIVERSAL ZOOM ENGINE
        ========================================== */
-    /* Photobooth strip layout */
     .photobooth-container {
         display: flex;
         justify-content: center;
@@ -375,11 +382,11 @@
         padding: 8px 8px 24px 8px;
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
         border-radius: 2px;
-        transition: transform 0.2s ease;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
         cursor: pointer;
     }
     
-    .photobooth-frame:hover {
+    .photobooth-frame:hover:not(.zoomed) {
         transform: scale(1.03) rotate(-1deg);
     }
     
@@ -388,21 +395,55 @@
         max-width: 180px;
         height: auto;
         border: 1px solid #eaeaea;
-    }
-    
-    /* Interactive Photobooth Zoom Overlay States */
-    .zoom-overlay .photobooth-frame {
-        transform: scale(1.2);
-        background: white;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    
-    .zoom-overlay .photobooth-img {
-        max-height: 75vh;
-        width: auto;
+        transition: max-height 0.4s ease, max-width 0.4s ease;
     }
 
-    /* Gallery Grid Variants */
+    /* UNIVERSAL ZOOM ENGINE 
+       Toggling '.zoomed' onto a .polaroid or .photobooth-frame turns it into a high-depth focus asset
+    */
+    .polaroid.zoomed, .photobooth-frame.zoomed {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(1) !important;
+        width: auto;
+        max-width: 90vw;
+        height: auto;
+        z-index: 500;
+        background: #ffffff;
+        padding: 16px 16px 32px 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        border-radius: 4px;
+        cursor: zoom-out;
+    }
+
+    /* Normalizes inner frame assets visually while viewing standard frames */
+    .polaroid.zoomed img, .polaroid.zoomed .image-placeholder,
+    .photobooth-frame.zoomed .photobooth-img {
+        max-height: 70vh;
+        max-width: 85vw;
+        width: auto;
+        object-fit: contain;
+        aspect-ratio: auto;
+    }
+
+    /* Backdrop lighting dims layout context behind focused card instances */
+    .zoom-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 499;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .zoom-backdrop.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Complex Picture Tab Custom Layout Configurations */
     .pics-main-grid {
         display: grid;
         width: 100%;
@@ -427,7 +468,6 @@
         margin-bottom: 40px;
     }
     
-    /* Dice grid structured positions */
     .sia-dice-grid .polaroid:nth-child(1) { grid-column: 1; grid-row: 1; }
     .sia-dice-grid .polaroid:nth-child(2) { grid-column: 3; grid-row: 1; }
     .sia-dice-grid .polaroid:nth-child(3) { grid-column: 2; grid-row: 2; }
@@ -475,7 +515,7 @@
         filter: drop-shadow(0 8px 15px rgba(255, 112, 150, 0.3));
     }
 
-    /* Floating Background Heart Particles */
+    /* Decorative Background Particles */
     .heart-container { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
     .heart { position: absolute; color: #ff7096; font-size: 20px; animation: floatUp 6s linear infinite; }
     
@@ -529,7 +569,7 @@
     
     .footer-right { justify-self: end; display: flex; align-items: center; }
 
-    /* SVG Gerbera Flower Swaying Animations */
+    /* SVG Gerbera Flower Animation System */
     .gerbera {
         width: 55px;
         height: 55px;
@@ -572,9 +612,9 @@
         
         .hk-sticker-btn svg { width: 65px; height: 65px; }
         .menu-container { top: 10px; right: 10px; }
-        .menu-dropdown { width: 280px; } /* Clean presentation width from sheet 2 */
+        .menu-dropdown { width: 280px; }
         
-        /* Grid responses for mobile viewports */
+        /* Grid Layout updates for mobile layout optimization */
         .pics-main-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } 
         .photo-booth-grid { gap: 12px; }
         .gift-sunrise-grid { grid-template-columns: 1fr; gap: 20px; } 
@@ -827,192 +867,187 @@ At hinding-hindi ako aalis.</p>
         </div>
 
 
-        <div id="pics-tab" class="tab-content">
-            <h1>Pics</h1>
-                        <div class="pics-main-grid">
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="1.1.jpg" alt="Memory 1" class="ratio-1-1">
-                    <span>Memory 1</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="1.jpg" alt="Memory 2" class="ratio-1-1">
-                    <span>Memory 2</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="2.jpg" alt="Memory 3" class="ratio-1-1">
-                    <span>Memory 3</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="3.jpg" alt="Memory 4" class="ratio-1-1">
-                    <span>Memory 4</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="4.jpg" alt="Memory 5" class="ratio-1-1">
-                    <span>Memory 5</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="5.jpg" alt="Memory 6" class="ratio-1-1">
-                    <span>Memory 6</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="6.jpg" alt="Memory 7" class="ratio-1-1">
-                    <span>Memory 7</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="7.jpg" alt="Memory 8" class="ratio-1-1">
-                    <span>Memory 8</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="8.jpg" alt="Memory 9" class="ratio-1-1">
-                    <span>Memory 9</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="9.jpg" alt="Memory 10" class="ratio-1-1">
-                    <span>Memory 10</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="10.jpg" alt="Memory 11" class="ratio-1-1">
-                    <span>Memory 11</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="11.jpg" alt="Memory 12" class="ratio-1-1">
-                    <span>Memory 12</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="13.jpg" alt="Memory 13" class="ratio-1-1">
-                    <span>Memory 13</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="14.jpg" alt="Memory 14" class="ratio-1-1">
-                    <span>Memory 14</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="15.jpg" alt="Memory 15" class="ratio-1-1">
-                    <span>Memory 15</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="16.jpg" alt="Memory 16" class="ratio-1-1">
-                    <span>Memory 16</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="17.jpg" alt="Memory 17" class="ratio-1-1">
-                    <span>Memory 17</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="18.jpg" alt="Memory 18" class="ratio-1-1">
-                    <span>Memory 18</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="19.jpg" alt="Memory 19" class="ratio-1-1">
-                    <span>Memory 19</span>
-                </div>
-
-                <!-- Replaced original loop with your specific photo files verbatim -->
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="26.jpg" alt="Memory 20" class="ratio-1-1">
-                    <span>Memory 20</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="21.jpg" alt="Memory 21" class="ratio-1-1">
-                    <span>Memory 21</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="22.jpg" alt="Memory 22" class="ratio-1-1">
-                    <span>Memory 22</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="23.jpg" alt="Memory 23" class="ratio-1-1">
-                    <span>Memory 23</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="24.jpg" alt="Memory 24" class="ratio-1-1">
-                    <span>Memory 24</span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="25.jpg" alt="Memory 25" class="ratio-1-1">
-                    <span>Memory 25</span>
-                </div>
-            </div>
-
-            <div class="photobooth-container">
-                <div class="photobooth-frame" onclick="zoomPicture(this, 'tall')">
-                    <img src="8.jpg" alt="Photobooth Strip 1" class="photobooth-img">
-                </div>
-                
-                <div class="photobooth-frame" onclick="zoomPicture(this, 'tall')">
-                    <img src="13.jpg" alt="Photobooth Strip 2" class="photobooth-img">
-                </div>
-                
-                <div class="photobooth-frame" onclick="zoomPicture(this, 'tall')">
-                    <img src="15.jpg" alt="Photobooth Strip 3" class="photobooth-img">
-                </div>
-            </div>
-                       <div class="section-caption">Sunrise</div>
-            <div class="gift-sunrise-grid">
-                <div class="polaroid" onclick="zoomPicture(this, 'widescreen')">
-                    <img src="Sunset.jpg" alt="Memory 23" class="ratio-16-9">
-                    <span></span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'widescreen')">
-                    <img src="Sunset2.jpg" alt="Memory 23" class="ratio-16-9">
-                    <span></span>
-                </div>
-                <div class="polaroid" onclick="zoomPicture(this, 'widescreen')">
-                   <img src="sUNSET 3.jpg" alt="Memory 23" class="ratio-16-9">
-                    <span></span>
-                </div>
-            </div>
-
-<div class="section-caption">Sia ❤️</div>
-            <div class="sia-dice-grid">
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="sia1.jpg" alt="Angel" class="ratio-1-1">
-                    <span>Pretty</span>
-                </div>
-                
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="sia2.jpg" alt="Darling" class="ratio-1-1">
-                    <span>Majestic</span>
-                </div>
-                
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="gifft.jpg" alt="Sweetheart" class="ratio-1-1">
-                    <span>Gift hehe</span>
-                </div>
-                
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="sia4.jpg" alt="My Love" class="ratio-1-1">
-                    <span>My Love</span>
-                </div>
-                
-                <div class="polaroid" onclick="zoomPicture(this, 'square')">
-                    <img src="sia5.jpg" alt="Forever" class="ratio-1-1">
-                    <span>beautiful</span>
-                </div>
-            </div>
-            <button class="hk-sticker-btn" onclick="showTab('home-tab')" aria-label="Go Back">
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <ellipse cx="50" cy="53" rx="41" ry="32" fill="#ffffff" />
-                    <circle cx="21" cy="27" r="14" fill="#ffffff" />
-                    <circle cx="79" cy="27" r="14" fill="#ffffff" />
-                    <circle cx="78" cy="33" r="13" fill="#ffffff" />
-                    <ellipse cx="50" cy="53" rx="36" ry="27" fill="#ffffff" stroke="#111111" stroke-width="3.5" />
-                    <path d="M 18,37 C 12,28 14,18 24,22 C 29,24 32,32 32,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
-                    <path d="M 82,37 C 88,28 86,18 76,22 C 71,24 68,32 68,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
-                    <ellipse cx="50" cy="53" rx="35.5" ry="26.5" fill="#ffffff" />
-                    <ellipse cx="50" cy="57" rx="4.5" ry="3.5" fill="#ffdf00" stroke="#111111" stroke-width="2.5" />
-                    <ellipse cx="33" cy="52" rx="3.5" ry="4.5" fill="#111111" />
-                    <ellipse cx="67" cy="52" rx="3.5" ry="4.5" fill="#111111" />
-                    <path d="M 20,54 L 8,53 M 19,60 L 6,61 M 21,66 L 9,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
-                    <path d="M 80,54 L 92,53 M 81,60 L 94,61 M 79,66 L 91,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
-                    <g transform="translate(4, -2)">
-                        <circle cx="61" cy="33" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
-                        <circle cx="75" cy="41" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
-                        <circle cx="67" cy="38" r="5.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
-                    </g>
-                </svg>
-            </button>
+ <div id="pics-tab" class="tab-content">
+    <h1>Pics</h1>
+    
+    <div class="pics-main-grid">
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="1.1.jpg" alt="Memory 1" class="ratio-1-1">
+            <span>Memory 1</span>
         </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="1.jpg" alt="Memory 2" class="ratio-1-1">
+            <span>Memory 2</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="2.jpg" alt="Memory 3" class="ratio-1-1">
+            <span>Memory 3</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="3.jpg" alt="Memory 4" class="ratio-1-1">
+            <span>Memory 4</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="4.jpg" alt="Memory 5" class="ratio-1-1">
+            <span>Memory 5</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="5.jpg" alt="Memory 6" class="ratio-1-1">
+            <span>Memory 6</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="6.jpg" alt="Memory 7" class="ratio-1-1">
+            <span>Memory 7</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="7.jpg" alt="Memory 8" class="ratio-1-1">
+            <span>Memory 8</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="8.jpg" alt="Memory 9" class="ratio-1-1">
+            <span>Memory 9</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="9.jpg" alt="Memory 10" class="ratio-1-1">
+            <span>Memory 10</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="10.jpg" alt="Memory 11" class="ratio-1-1">
+            <span>Memory 11</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="11.jpg" alt="Memory 12" class="ratio-1-1">
+            <span>Memory 12</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="13.jpg" alt="Memory 13" class="ratio-1-1">
+            <span>Memory 13</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="14.jpg" alt="Memory 14" class="ratio-1-1">
+            <span>Memory 14</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="15.jpg" alt="Memory 15" class="ratio-1-1">
+            <span>Memory 15</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="16.jpg" alt="Memory 16" class="ratio-1-1">
+            <span>Memory 16</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="17.jpg" alt="Memory 17" class="ratio-1-1">
+            <span>Memory 17</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="18.jpg" alt="Memory 18" class="ratio-1-1">
+            <span>Memory 18</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="19.jpg" alt="Memory 19" class="ratio-1-1">
+            <span>Memory 19</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="26.jpg" alt="Memory 20" class="ratio-1-1">
+            <span>Memory 20</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="21.jpg" alt="Memory 21" class="ratio-1-1">
+            <span>Memory 21</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="22.jpg" alt="Memory 22" class="ratio-1-1">
+            <span>Memory 22</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="23.jpg" alt="Memory 23" class="ratio-1-1">
+            <span>Memory 23</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="24.jpg" alt="Memory 24" class="ratio-1-1">
+            <span>Memory 24</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="25.jpg" alt="Memory 25" class="ratio-1-1">
+            <span>Memory 25</span>
+        </div>
+    </div>
+
+    <div class="photobooth-container">
+        <div class="photobooth-frame" onclick="zoomPicture(this, 'tall')">
+            <img src="8.jpg" alt="Photobooth Strip 1" class="photobooth-img">
+        </div>
+        <div class="photobooth-frame" onclick="zoomPicture(this, 'tall')">
+            <img src="13.jpg" alt="Photobooth Strip 2" class="photobooth-img">
+        </div>
+        <div class="photobooth-frame" onclick="zoomPicture(this, 'tall')">
+            <img src="15.jpg" alt="Photobooth Strip 3" class="photobooth-img">
+        </div>
+    </div>
+
+    <div class="section-caption">Sunrise</div>
+    <div class="gift-sunrise-grid">
+        <div class="polaroid" onclick="zoomPicture(this, 'widescreen')">
+            <img src="Sunset.jpg" alt="Sunrise 1" class="ratio-16-9">
+            <span>Golden Hour</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'widescreen')">
+            <img src="Sunset2.jpg" alt="Sunrise 2" class="ratio-16-9">
+            <span>Sky Views</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'widescreen')">
+            <img src="sUNSET 3.jpg" alt="Sunrise 3" class="ratio-16-9">
+            <span>Morning Glow</span>
+        </div>
+    </div>
+
+    <div class="section-caption">Sia ❤️</div>
+    <div class="sia-dice-grid">
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="sia1.jpg" alt="Angel" class="ratio-1-1">
+            <span>Pretty</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="sia2.jpg" alt="Darling" class="ratio-1-1">
+            <span>Majestic</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="gifft.jpg" alt="Sweetheart" class="ratio-1-1">
+            <span>Gift hehe</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="sia4.jpg" alt="My Love" class="ratio-1-1">
+            <span>My Love</span>
+        </div>
+        <div class="polaroid" onclick="zoomPicture(this, 'square')">
+            <img src="sia5.jpg" alt="Forever" class="ratio-1-1">
+            <span>beautiful</span>
+        </div>
+    </div>
+
+    <button class="hk-sticker-btn" onclick="showTab('home-tab')" aria-label="Go Back To Home Tab">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="50" cy="53" rx="41" ry="32" fill="#ffffff" />
+            <circle cx="21" cy="27" r="14" fill="#ffffff" />
+            <circle cx="79" cy="27" r="14" fill="#ffffff" />
+            <circle cx="78" cy="33" r="13" fill="#ffffff" />
+            <ellipse cx="50" cy="53" rx="36" ry="27" fill="#ffffff" stroke="#111111" stroke-width="3.5" />
+            <path d="M 18,37 C 12,28 14,18 24,22 C 29,24 32,32 32,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+            <path d="M 82,37 C 88,28 86,18 76,22 C 71,24 68,32 68,37 Z" fill="#ffffff" stroke="#111111" stroke-width="3.5" stroke-linejoin="round" />
+            <ellipse cx="50" cy="35.5" rx="35.5" ry="26.5" fill="#ffffff" />
+            <ellipse cx="50" cy="57" rx="4.5" ry="3.5" fill="#ffdf00" stroke="#111111" stroke-width="2.5" />
+            <ellipse cx="33" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+            <ellipse cx="67" cy="52" rx="3.5" ry="4.5" fill="#111111" />
+            <path d="M 20,54 L 8,53 M 19,60 L 6,61 M 21,66 L 9,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+            <path d="M 80,54 L 92,53 M 81,60 L 94,61 M 79,66 L 91,69" stroke="#111111" stroke-width="3" stroke-linecap="round" />
+            <g transform="translate(4, -2)">
+                <circle cx="61" cy="33" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                <circle cx="75" cy="41" r="8.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+                <circle cx="67" cy="38" r="5.5" fill="#ff3366" stroke="#111111" stroke-width="3" />
+            </g>
+        </svg>
+    </button>
+</div>
 
         <div id="message-tab" class="tab-content">
             <h1>Message</h1>
@@ -1198,22 +1233,67 @@ At hinding-hindi ako aalis.</p>
         }
         setInterval(createHeartParticle, 900);
 
-        // --- PICTURE ZOOM SYSTEM ---
-        function zoomPicture(element, formatType) {
-            const overlay = document.getElementById('zoomOverlay');
-            overlay.innerHTML = ''; 
+/**
+ * Universal Polaroid & Photobooth Zoom Engine
+ */
+function zoomPicture(element, shape) {
+    // 1. Check if a backdrop already exists; if not, create and inject it dynamically
+    let backdrop = document.querySelector('.zoom-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'zoom-backdrop';
+        document.body.appendChild(backdrop);
+        
+        // Clicking the dim background closes any open zoom immediately
+        backdrop.addEventListener('click', closeActiveZoom);
+    }
 
-            const clone = element.cloneNode(true);
-            clone.removeAttribute('onclick'); 
+    // 2. If the clicked element is already zoomed, clicking it again closes it
+    if (element.classList.contains('zoomed')) {
+        closeActiveZoom();
+        return;
+    }
 
-            overlay.appendChild(clone);
-            overlay.classList.add('active');
-        }
+    // 3. Clear any existing active zooms on the page to prevent stacking bugs
+    closeActiveZoom();
 
-        function closeZoom() {
-            const overlay = document.getElementById('zoomOverlay');
-            overlay.classList.remove('active');
-        }
+    // 4. Activate the zoom layout properties on our targets
+    backdrop.classList.add('active');
+    element.classList.add('zoomed');
+    
+    // Optional: track aspect data modifiers if custom mobile cropping fixes are needed
+    element.setAttribute('data-zoom-shape', shape);
+    
+    // Handle scroll locking safely while zoomed in
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Global helper to close active focused frames safely
+ */
+function closeActiveZoom() {
+    const activelyZoomed = document.querySelectorAll('.polaroid.zoomed, .photobooth-frame.zoomed');
+    const backdrop = document.querySelector('.zoom-backdrop');
+    
+    activelyZoomed.forEach(item => {
+        item.classList.remove('zoomed');
+        item.removeAttribute('data-zoom-shape');
+    });
+    
+    if (backdrop) {
+        backdrop.classList.remove('active');
+    }
+    
+    // Restore layout scrolling freedom
+    document.body.style.overflow = '';
+}
+
+// Global keypress fallback listener: Pressing 'Escape' exits zoom preview
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeActiveZoom();
+    }
+});
     </script>
 </body>
 </html>
